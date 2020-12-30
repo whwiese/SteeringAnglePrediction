@@ -19,14 +19,14 @@ class CNNDriver(nn.Module):
         self.cnn = create_cnn(cnn_architecture, self.input_dims[0])
         cnn_out = cnn_output_size(self.input_dims,cnn_architecture)
         out_size = cnn_out[0]*cnn_out[1]*cnn_out[2]
-        self.fcs = create_fcs(out_size,[1164,100,50])
-        self.output_layer = nn.Linear(50,10)
+        self.fcs = create_fcs(out_size,[1164,100,50,10])
+        self.output_layer = nn.Linear(10,1)
     
     def forward(self, x):
         x = self.cnn(x)
         x = torch.flatten(x,start_dim=1)
         x = self.fcs(x)
-        x = self.output_layer(x)
+        x = self.output_layer(x).squeeze()
         return x
 
         
