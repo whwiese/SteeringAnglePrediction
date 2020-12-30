@@ -50,3 +50,17 @@ def evaluateModel(model, train_loader, val_loader, loss_fn, device="cpu"):
 
     return train_mse, val_mse
 
+def plotMSEs(train_mses, val_mses, epochs):
+    fig = plt.figure()
+    ax = plt.axes()
+
+    train = ax.plot(epochs, train_mses, color='blue', label="train")
+    val = ax.plot(epochs, val_mses, color='red', label="val")
+
+    plt.title("Training Loss vs Val Loss")
+    plt.xlabel('Epochs')
+    plt.ylabel('MSE Loss')
+
+    plt.legend(loc="upper right")
+
+    plt.show()

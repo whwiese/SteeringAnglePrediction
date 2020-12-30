@@ -6,11 +6,8 @@ import torchvision.transforms.functional as FT
 from torch.utils.data import (DataLoader, random_split)
 from model import CNNDriver
 from dataset import SteeringAngleDataset
-from utils import evaluateModel
+from utils import (evaluateModel, plotMSEs)
 import time
-
-seed = 123
-torch.manual_seed(seed)
 
 #model hyperparameters
 INPUT_DIMS = (3,66,200)
@@ -24,11 +21,11 @@ EPOCHS = 200
 NUM_WORKERS = 2
 PIN_MEMORY = False
 LOAD_MODEL = False
-DROP_LAST = True
-TRAIN_DATA = "data/drive1_train.csv"
-VAL_DATA = "data/drive1_val.csv"
+DROP_LAST = False
+TRAIN_DATA = "data/mini_drive1_train.csv"
+VAL_DATA = "data/mini_drive1_val.csv"
 TEST_DATA = None 
-SAVE_MODEL_PATH = "saved_models/trial1"
+SAVE_MODEL_PATH = "saved_models/mini_trial1"
 LOAD_MODEL_PATH = None
 IMG_DIR = "data/drive1"
 
@@ -49,7 +46,7 @@ def train_fn(train_loader, model, optimizer, loss_fn):
     mean_loss = []
 
     for batch_index, (x, y) in enumerate(train_loader):
-        x, y = x.to(DEVICE), y.to(DEVICE)
+        x, y = x.to(DEVICE), y.to(DEVICE).float()
         out = model(x)
         loss = loss_fn(out, y)
         mean_loss.append(loss.item())
@@ -127,6 +124,8 @@ def main():
             train_mses.append(train_mse)
             val_mses.append(val_mse)
             epochs_recorded.append(epochs_passed)
+
+            plotMSEs(train_mses, val_mses, epochs_recorded)
 
             print("Train MSE: %f"%(train_mse))
             print("Val MSE: %f"%(val_mse))
