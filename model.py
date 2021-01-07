@@ -4,7 +4,7 @@ from modelUtils import (create_cnn, CNNBlock,
                         create_fcs, cnn_output_size)
 
 class CNNDriver(nn.Module):
-    def __init__(self, input_dims = (3,66,200)):
+    def __init__(self, input_dims = (3,66,200), norm="batch"):
         super().__init__()
         self.input_dims = input_dims
 
@@ -16,7 +16,9 @@ class CNNDriver(nn.Module):
             (3,64,1,0),
         ]
 
-        self.cnn = create_cnn(cnn_architecture, self.input_dims[0])
+        self.cnn = create_cnn(cnn_architecture, self.input_dims[0],
+                norm=norm,
+        )
         cnn_out = cnn_output_size(self.input_dims,cnn_architecture)
         out_size = cnn_out[0]*cnn_out[1]*cnn_out[2]
         self.fcs = create_fcs(out_size,[1164,100,50,10])
@@ -30,7 +32,7 @@ class CNNDriver(nn.Module):
         return x
 
 class DeeperCNNDriver(nn.Module):
-    def __init__(self, input_dims = (3,455,256)):
+    def __init__(self, input_dims = (3,455,256), norm="batch"):
         super().__init__()
         self.input_dims = input_dims
 
@@ -46,7 +48,8 @@ class DeeperCNNDriver(nn.Module):
             (3,64,1,0),
         ]
 
-        self.cnn = create_cnn(cnn_architecture, self.input_dims[0])
+        self.cnn = create_cnn(cnn_architecture, self.input_dims[0],
+                norm=norm)
         cnn_out = cnn_output_size(self.input_dims,cnn_architecture)
         out_size = cnn_out[0]*cnn_out[1]*cnn_out[2]
         self.fcs = create_fcs(out_size,[1164,100,50,10])

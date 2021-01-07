@@ -9,19 +9,19 @@ CREATE CNN ARCHITECTURE FORMAT:
 N signifies number of times to repeat sequence of conv layers
 """
 
-def create_cnn(architecture, in_channels=3):
+def create_cnn(architecture, in_channels=3, norm=None):
     layers = []
 
     for layer in architecture:
         if type(layer) == tuple:
-            layers += [CNNBlock(in_channels,layer[1],layer[0],layer[2],layer[3])]
+            layers += [CNNBlock(in_channels,layer[1],layer[0],layer[2],layer[3], norm=norm)]
             in_channels = layer[1]
         elif type(layer) == str:
             layers += [nn.MaxPool2d(kernel_size=2,stride=2)]
         elif type(layer) == list:
             for _ in range(layer[-1]):
                 for conv in layer[:-1]:
-                    layers += [CNNBlock(in_channels,conv[1],conv[0],conv[2],conv[3])]
+                    layers += [CNNBlock(in_channels,conv[1],conv[0],conv[2],conv[3], norm=norm)]
                     in_channels = conv[1]
 
     return nn.Sequential(*layers)
@@ -67,16 +67,18 @@ def create_fcs(input_size, output_sizes, dropout=0.0, batch_norm=False):
     return nn.Sequential(*fcs)
 
 class CNNBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size,  stride=1, padding=0):
+    def __init__(self, in_channels, out_channels, kernel_size,  stride=1, padding=0, norm=None):
         super().__init__()
         self.conv= nn.Conv2d(in_channels, out_channels, kernel_size,  bias=False,
                 stride=stride, padding=padding)
         self.batchnorm = nn.BatchNorm2d(out_channels)
         self.ReLU = nn.ReLU()
+        self.norm = norm
 
     def forward(self,x):
         x = self.conv(x)
-        x = self.batchnorm(x)
+        if self.norm == "batch":
+            x = self.batchnorm(x)
         x = self.ReLU(x)
         return x
 
