@@ -1,10 +1,14 @@
 # Steering Angle Prediction for Self-Driving Cars
 
-A pytorch implementation of NVIDIA's 2016 paper "End to End Learning for Self-Driving Cars".
+A pytorch implementation of NVIDIA's 2016 paper "End to End Learning for Self-Driving Cars". 
 
 ---
 
 ### Test Log
+
+#### Deeper Model (01/04/2021)
+
+I added some extra conv layers to model 1 and trained this as a baseline for futute, more ambitious, architectures. Training went slower than with model 1, but this model eventually reached the same loss levels and even a bit lower, though I let it train for longer. See the DeeperModel folder in ModelStats for plots and info.
 
 #### Diff Model (01/02/2021)
 
