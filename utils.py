@@ -17,7 +17,8 @@ def plot_image(image, angle):
     ax.yaxis.set_visible(False)
     plt.show()
 
-def evaluateModel(model, train_loader, val_loader, loss_fn, device="cpu"):
+def evaluateModel(model, train_loader, val_loader, loss_fn, device="cpu",
+        num_train_batches=-1, pass_batches=0):
     """
     returns mse loss of model on train and validation sets
     """
@@ -30,11 +31,15 @@ def evaluateModel(model, train_loader, val_loader, loss_fn, device="cpu"):
     val_batches = 0
 
     for batch_index, (x, y) in enumerate(train_loader):
+        if batch_index < pass_batches:
+            pass
         x, y = x.to(device), y.to(device)
         out = model(x)
         loss = loss_fn(out, y)
         train_loss_sum += loss.item()
         train_batches += 1
+        if batch_index==num_train_batches:
+            break
 
     for batch_index, (x, y) in enumerate(val_loader):
         x, y = x.to(device), y.to(device)
