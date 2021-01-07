@@ -6,6 +6,20 @@ A pytorch implementation of NVIDIA's 2016 paper "End to End Learning for Self-Dr
 
 ### Test Log
 
+#### Multi Frame Model (01/06/2021)
+
+I would consider this model my first major improvement over Model 1. It reaches validation set losses in the 200s within 10 epochs (as opposed to a minimum of 410.72 reached by Model 1 after 130 epochs). Training loss lags behind a bit, but appears to be declining at the end of training as the model overfits this the training set (as it does in every model so far). So... what is this model?
+
+This version of the "Multi Frame Model" is simply "Deeper Model", but it takes the previous 4 frames as input along with the current frame, giving it some temporal information. I implemented this by simply concatenating each frame along the rgb dimension, so while Deeper Model takes input tensors (frames) of size [batch_size, 3, 455, 256], this model takes tensors of size [batch_size, 15, 455, 256]. This led to surprisingly good results, as it beat all previous models on the validation set by a significant margin.
+
+<img src="https://github.com/whwiese/SteeringAnglePrediction/blob/master/ModelStats/MultiFrame/Loss35e.png" alt="gen" width="400"/> <img src="https://github.com/whwiese/SteeringAnglePrediction/blob/master/ModelStats/MultiFrame/ValSet35.png" alt="gen" width="400"/>
+
+We can see that the model performs well on the validation set relative to the other models, but it still has an oversteering problem on large turns. Given the small amount of data I'm training on, however, I'd say this is a strong result. Check out the MultiFrame folder in ModelStats for more plots and info.
+
+What's next? Probably some messing with normalizers (is batch norm helping? add dropout?), then I'd like to explore LSTM modes.
+
+Note: I realize 3D convolutions are a thing... and are desdigned specifically for datasets like this. I will likely experiment with using these in the future too.
+
 #### Deeper Model (01/04/2021)
 
 I added some extra conv layers to model 1 and trained this as a baseline for futute, more ambitious, architectures. Training went slower than with model 1, but this model eventually reached the same loss levels and even a bit lower, though I let it train for longer. See the DeeperModel folder in ModelStats for plots and info.
