@@ -6,6 +6,12 @@ A pytorch implementation of NVIDIA's 2016 paper "End to End Learning for Self-Dr
 
 ### Test Log
 
+#### Diff Model (01/02/2021)
+
+One issue with Model 1 is that it lacked any temporal information in its training process. It does not treat a frame differently based on information from previous frames. For this model I introduced some temporal information by inputting the pixel-by-pixel differnece between the current frame and the next-to-previous frame (inspired by [ref 3](https://github.com/udacity/self-driving-car/tree/master/steering-models/community-models/rambo)), as opposed to simply inputting the current frame. I chose to look back two frames instead of just one so the difference between frames would be more significant (the data used is about 20 fps), although I have included "lookback" as a hyperparameter of the custom dataset so I can adjust it in future tests. 
+
+During training, the losses on the training and validation sets initially decreased more rapidly than they did when trainign Model 1, but training appeared to saturate around 60 epochs, and while the model reached similar training set loss to Model 1, it never quite reached Model 1's lowest validation set loss mark. For training and performance graphs check out the DiffModel folder in the ModelStats folder in this repository.
+
 #### Model 1 (01/01/2021)
 
 New year, new model! This is my first attempt at training an end-to-end steering angle predictor. I followed the Nvidia paper specifiacations for this model, 
@@ -27,7 +33,22 @@ We can see that the model is learning to steer, although I'm not quite ready to 
 
 ---
 
+### Guide To Files
+
+model.py: Contains pytorch model definitions.
+
+modelUtils.py: Utility functions for efficient model building. Only used within model.py.
+
+dataset.py: Contains custom dataset classes.
+
+train.py: An example of the loop used to train models. Can make use of any datasets/models in this repository with slight modifications.
+
+utils.py: Utility functions used by other files in the repository.
+
+---
+
 ### References
 
 1. [End to End Learning for Self-Driving Cars](https://arxiv.org/abs/1604.07316) - Bojarski et al., 2016.
 2. [Driving Data](https://github.com/SullyChen/driving-datasets) - Sully Chen.
+3. [rambo Udacity Challenge Model](https://github.com/udacity/self-driving-car/tree/master/steering-models/community-models/rambo)
