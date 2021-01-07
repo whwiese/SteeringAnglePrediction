@@ -14,9 +14,9 @@ This version of the "Multi Frame Model" is simply "Deeper Model", but it takes t
 
 <img src="https://github.com/whwiese/SteeringAnglePrediction/blob/master/ModelStats/MultiFrame/Loss35e.png" alt="gen" width="400"/> <img src="https://github.com/whwiese/SteeringAnglePrediction/blob/master/ModelStats/MultiFrame/ValSet35.png" alt="gen" width="400"/>
 
-We can see that the model performs well on the validation set relative to the other models, but it still has an oversteering problem on large turns. Given the small amount of data I'm training on, however, I'd say this is a strong result. Check out the MultiFrame folder in ModelStats for more plots and info.
+We can see that the model performs well on the validation set relative to the other models, but it still has an oversteering problem on large turns. Given the small amount of data I'm training on, however, I'd say this is a strong result. Downside is it takes a long time to train due to slow data loading. One could imagine a more efficient data collection and preprocessing procedure in a real car though. Check out the MultiFrame folder in ModelStats for more plots and info.
 
-What's next? Probably some messing with normalizers (is batch norm helping? add dropout?), then I'd like to explore LSTM modes.
+What's next? Probably some messing with normalizers (is batch norm helping? add dropout?), and hyperparameters (learning rate, weight decay), then I'd like to explore LSTM models.
 
 Note: I realize 3D convolutions are a thing... and are desdigned specifically for datasets like this. I will likely experiment with using these in the future too.
 
