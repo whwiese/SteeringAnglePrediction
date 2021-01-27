@@ -55,6 +55,56 @@ def evaluateModel(model, train_loader, val_loader, loss_fn, device="cpu",
 
     return train_mse, val_mse
 
+def evaluateLSTMModel(model, train_loader, val_loader, loss_fn,
+        hidden_size=256, device="cpu", num_train_batches=-1, pass_batches=0):
+    """
+    returns mse loss of model on train and validation sets
+    """
+    model.eval()
+
+    train_loss_sum = 0.0
+    val_loss_sum = 0.0
+
+    train_batches = 0
+    val_batches = 0
+
+    prev_h = torch.zeros(1, 1, hidden_size).to(device)
+    prev_c = torch.zeros(1, 1, hidden_size).to(device)
+
+    for batch_index, (x, y) in enumerate(train_loader):
+        if batch_index < pass_batches:
+            pass
+        x, y = x.to(device), y.to(device)
+        out, h_out, c_out = model(x, prev_h, prev_c)
+        loss = loss_fn(out, y)
+        train_loss_sum += loss.item()
+        train_batches += 1
+        if batch_index==num_train_batches:
+            break
+
+        prev_h = h_out[:,-1,:].unsqueeze(0).detach()
+        prev_c = c_out[:,-1,:].unsqueeze(0).detach()
+
+    prev_h = torch.zeros(1, 1, hidden_size).to(device)
+    prev_c = torch.zeros(1, 1, hidden_size).to(device)
+
+    for batch_index, (x, y) in enumerate(val_loader):
+        x, y = x.to(device), y.to(device)
+        out, h_out, c_out = model(x, prev_h, prev_c)
+        loss = loss_fn(out, y)
+        val_loss_sum += loss.item()
+        val_batches += 1
+
+        prev_h = h_out[:,-1,:].unsqueeze(0).detach()
+        prev_c = c_out[:,-1,:].unsqueeze(0).detach()
+
+    train_mse = train_loss_sum/train_batches
+    val_mse = val_loss_sum/val_batches
+
+    model.train()
+
+    return train_mse, val_mse
+
 def plotMSEs(train_mses, val_mses, epochs):
     fig = plt.figure()
     ax = plt.axes()

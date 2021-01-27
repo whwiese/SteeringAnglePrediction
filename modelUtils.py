@@ -26,6 +26,32 @@ def create_cnn(architecture, in_channels=3, norm=None):
 
     return nn.Sequential(*layers)
 
+def create_cnn3D(architecture, in_channels=3, norm=None):
+    """
+    creates a sequential network of Conv3D layers.
+    conv layers come in form [kernel_size, out_channels, stride, padding]
+    """
+    layers = []
+
+    for layer in architecture:
+        if type(layer) == tuple:
+            layers += [CNNBlock(in_channels,layer[1],
+                layer[0],layer[2],layer[3], norm=norm,
+                threeD=True,
+            )]
+
+            in_channels = layer[1]
+        elif type(layer) == list:
+            for _ in range(layer[-1]):
+                for conv in layer[:-1]:
+                    layers += [CNNBlock(in_channels,conv[1],
+                        conv[0],conv[2],conv[3], norm=norm,
+                        threeD=True,
+                    )]
+                    in_channels = conv[1]
+
+    return nn.Sequential(*layers)
+
 """
 creates a seuqential network of fully connected layers
 with optional dropout and batchnorm
@@ -67,11 +93,21 @@ def create_fcs(input_size, output_sizes, dropout=0.0, batch_norm=False):
     return nn.Sequential(*fcs)
 
 class CNNBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size,  stride=1, padding=0, norm=None):
+    def __init__(self, in_channels, out_channels, kernel_size, 
+            stride=1, padding=0, norm=None, threeD=False):
         super().__init__()
-        self.conv= nn.Conv2d(in_channels, out_channels, kernel_size,  bias=False,
-                stride=stride, padding=padding)
-        self.batchnorm = nn.BatchNorm2d(out_channels)
+
+        if threeD:
+            self.conv= nn.Conv3d(in_channels, out_channels,
+                    kernel_size,  bias=False,
+                    stride=stride, padding=padding)
+            self.batchnorm = nn.BatchNorm3d(out_channels)
+        else:
+            self.conv= nn.Conv2d(in_channels, out_channels,
+                    kernel_size,  bias=False,
+                    stride=stride, padding=padding)
+            self.batchnorm = nn.BatchNorm2d(out_channels)
+
         self.ReLU = nn.ReLU()
         self.norm = norm
 
@@ -81,7 +117,6 @@ class CNNBlock(nn.Module):
             x = self.batchnorm(x)
         x = self.ReLU(x)
         return x
-
 
 def cnn_output_size(input_size, architecture):
     """
@@ -110,6 +145,39 @@ def cnn_output_size(input_size, architecture):
                 for conv in layer[:-1]:
                     output_x = (output_x-conv[0]+2*conv[3])//conv[2]+1
                     output_y = (output_y-conv[0]+2*conv[3])//conv[2]+1
+                    output_channels = conv[1]
+
+    return (output_channels, output_x, output_y)
+
+def cnn3D_output_size(input_size, architecture):
+    """
+    calculates the output size of a 3D cnn
+    created with create_cnn based on its
+    architecture
+
+    NOTE: does not include depth dimension
+
+    inputs:
+        input_size (tuple): input_channels, input_x, input_y
+        architecture (list): see create_cnn for format details
+    returns:
+        output_size(tuple): output_channels, output_x, output_y
+    """
+    output_channels, _, output_x, output_y = input_size
+
+    for layer in architecture:
+        if type(layer) == tuple:
+            output_x = (output_x-layer[0][1]+2*layer[3])//layer[2][1]+1
+            output_y = (output_y-layer[0][1]+2*layer[3])//layer[2][1]+1
+            output_channels = layer[1]
+        elif type(layer) == str:
+            output_x = output_x//2
+            output_y = output_y//2
+        elif type(layer) == list:
+            for _ in range(layer[-1]):
+                for conv in layer[:-1]:
+                    output_x = (output_x-conv[0][1]+2*conv[3])//conv[2][1]+1
+                    output_y = (output_y-conv[0][1]+2*conv[3])//conv[2][1]+1
                     output_channels = conv[1]
 
     return (output_channels, output_x, output_y)

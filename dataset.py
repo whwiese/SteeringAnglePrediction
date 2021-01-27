@@ -121,3 +121,52 @@ class SteeringAngleMultiFrameDataset(torch.utils.data.Dataset):
         steering_angle = example[1]
 
         return output_frames, steering_angle
+
+class SteeringAngle3DDataset(torch.utils.data.Dataset):
+    """
+    Similar to multi frame dataset, but concatenates frames along
+    new dimension (dim 1). Outputs a 4d tensor.
+    """
+    def __init__(self, csv_file, img_dir, transform=None, num_frames=10):
+        self.datapoints = pd.read_csv(csv_file)
+        self.img_dir = img_dir
+        self.transform = transform
+        self.num_frames = num_frames
+
+    def __len__(self):
+        return len(self.datapoints)
+
+    def __getitem__(self, index):
+        example = self.datapoints.iloc[index]
+
+        img1_name = example[0]
+        img1_number = int(img1_name.split('.')[0])
+        img1_path = os.path.join(self.img_dir, img1_name)
+        image1 = Image.open(img1_path)
+
+        if self.transform:
+            image1 = self.transform(image1)
+
+        output_frames = image1.unsqueeze(1) 
+
+        lookback = 1
+
+        while (lookback < self.num_frames):
+            img_number = img1_number - lookback
+            if img_number < 0:
+                img_number = 0
+
+            img_name = str(img_number) + '.jpg'
+            img_path = os.path.join(self.img_dir, img_name)
+            image = Image.open(img_path)
+
+            if self.transform:
+                image = self.transform(image)
+
+            output_frames = torch.cat((output_frames, image.unsqueeze(1)), 1)
+
+            lookback += 1
+
+        steering_angle = example[1]
+
+        return output_frames, steering_angle
