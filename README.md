@@ -1,10 +1,32 @@
 # Steering Angle Prediction for Self-Driving Cars
 
-A pytorch implementation of NVIDIA's 2016 paper "End to End Learning for Self-Driving Cars". 
+In this repository I explore different deep learning approaches to steering angle prediction for self-driving cars. Models are trained on a dataset of images from a front-facing camera mounted on a car. Each image is labeled with the steering wheel angle that the human driver has applied in that moment. The goal of the models is to predict steering wheel angle based on images alone.
+
+The baseline model "model 1" is an implementation of NVIDIA's 2016 paper "End to End Learning for Self-Driving Cars". I build on this model based on later work, especially contributions to the [Udacity Self-Driving Car Challenge](https://github.com/udacity/self-driving-car/tree/master/steering-models).
 
 ---
 
 ### Test Log
+
+#### LSTM Model (01/27/2020)
+
+The idea behind this model is to incorporate memory beyond the few frames that are included in the multi frame model or a 3d CNN.
+
+Architecture:
+
+- CNN from model 1
+- 1 fully-connected layer
+- LSTM with a hidden-state size of 256
+- 5 Fully connected layers identical to those in model 1, except the first layer has an output size of 256 instead of 1164
+
+See the "LSTMDriver" class in model.py for the full implementation. The LSTM operates over the batch that is fed to the model, and passes its final hidden and cell states as input to the next batch's LSTM. Gradients, however, are not propogated between batches at training time. My hope is that with enough data the model will learn to incorporate information from the past in a useful way (e.g. remembering a car it had seen in the past, but is now out of view). My intuition is that it is unlikely for this to have a large impact based on the small amount of data I have, but it might help the model stabilize its outputs a bit by giving it some information about its previous predictions.
+
+I saw some interesting results after training this model for 200 epochs. The model converged to a decent training and validation set loss more quickly and smoothly than model 1 did, however it never reached validation loss values as low as those output by the multi-frame model. Taking a look at the evaluation plots, however, we can see that the 165 epoch LSTM model is far less prone to oversteering on the validation set than even the best Multi Frame model, though it struggles a bit more on small angles and may understeer. This increased stability seems like a desirable property, and an LSTM based model may prove to be superior to the multi frame model with some architecture adjustments and fine-tuning.
+
+<img src="https://github.com/whwiese/SteeringAnglePrediction/blob/master/ModelStats/LSTM1/LSTM_200e.png" alt="gen" width="400"/> <img src="https://github.com/whwiese/SteeringAnglePrediction/blob/master/ModelStats/LSTM1/Val_165e.png" alt="gen" width="400"/>
+
+Note: I stepped down the learning rate from 2e-5 to 1e-6 at 50 epochs, which accounts for the smoothing of the curves after that point. I did a run without stepping down too, but the losses became quite unstable after ~50 epochs.
+
 
 #### Multi Frame Model (01/06/2021)
 
