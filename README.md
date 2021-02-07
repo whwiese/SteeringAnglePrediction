@@ -34,7 +34,7 @@ I would consider this model my first major improvement over Model 1. It reaches 
 
 This version of the "Multi Frame Model" is simply "Deeper Model", but it takes the previous 4 frames as input along with the current frame, giving it some temporal information. I implemented this by simply concatenating each frame along the rgb dimension, so while Deeper Model takes input tensors (frames) of size [batch_size, 3, 455, 256], this model takes tensors of size [batch_size, 15, 455, 256]. This led to surprisingly good results, as it beat all previous models on the validation set by a significant margin.
 
-<img src="https://github.com/whwiese/SteeringAnglePrediction/blob/master/ModelStats/MultiFrame/Loss35e.png" alt="gen" width="400"/> <img src="https://github.com/whwiese/SteeringAnglePrediction/blob/master/ModelStats/MultiFrame/ValSet35.png" alt="gen" width="400"/>
+<img src="https://github.com/whwiese/SteeringAnglePrediction/blob/master/ModelStats/MultiFrame/Loss35e.png" alt="gen" width="400"/> <img src="https://github.com/whwiese/SteeringAnglePrediction/blob/master/ModelStats/MultiFrame/ValSet35e.png" alt="gen" width="400"/>
 
 We can see that the model performs well on the validation set relative to the other models, but it still has an oversteering problem on large turns. Given the small amount of data I'm training on, however, I'd say this is a strong result. Downside is it takes a long time to train due to slow data loading. One could imagine a more efficient data collection and preprocessing procedure in a real car though. Check out the MultiFrame folder in ModelStats for more plots and info.
 
